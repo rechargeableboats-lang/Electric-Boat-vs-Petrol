@@ -396,11 +396,11 @@
         const elecAudio = new Audio();
         const petrolAudio = new Audio();
 
-        elecAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/freesound_community-boat-on-river-26388.mp3';
+        elecAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/electric-motor-sound-quiet.mp3';
         elecAudio.loop = true;
         elecAudio.crossOrigin = 'anonymous';
 
-        petrolAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/electric-motor-sound-quiet.mp3';
+        petrolAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/freesound_community-boat-on-river-26388.mp3';
         petrolAudio.loop = true;
         petrolAudio.crossOrigin = 'anonymous';
 
@@ -445,7 +445,9 @@
 
             let noiseLevel = 0;
             if (throttle > 0) {
-                noiseLevel = 60 + (throttle / 100) * 22;
+                noiseLevel = 60 + (throttle / 100) * 23;
+            } else {
+                noiseLevel = 60;
             }
             document.getElementById('petrolNoiseLevel').textContent = noiseLevel.toFixed(0) + ' dB 🔊';
 
@@ -470,18 +472,11 @@
             const rotation = (speed / 25) * 180;
             document.getElementById('petrolNeedle').style.transform = `rotate(${rotation}deg)`;
 
-            if (throttle === 0) {
-                petrolAudio.volume = 0.2;
-                if (petrolAudio.paused) {
-                    petrolAudio.play().catch(e => {});
-                }
-            } else {
-                const dbLevel = 60 + (throttle / 100) * 22;
-                const volume = Math.pow(10, (dbLevel - 60) / 20) * 0.2;
-                petrolAudio.volume = Math.min(volume, 0.7);
-                if (petrolAudio.paused) {
-                    petrolAudio.play().catch(e => {});
-                }
+            const dbLevel = throttle === 0 ? 60 : 60 + (throttle / 100) * 23;
+            const volume = Math.pow(10, (dbLevel - 60) / 20) * 0.15;
+            petrolAudio.volume = Math.min(volume, 0.8);
+            if (petrolAudio.paused) {
+                petrolAudio.play().catch(e => {});
             }
 
             elecAudio.pause();
@@ -516,10 +511,14 @@
                 return;
             }
 
-            // Handle reverse
+            // Handle reverse - move backward through video
             if (dir === 'reverse') {
                 video.pause();
-                video.currentTime = video.duration || 0;
+                const maxSpeed = 25;
+                const speedRatio = Math.min(speed / maxSpeed, 1);
+                if (speedRatio > 0.1) {
+                    video.currentTime = Math.max(0, video.currentTime - (speedRatio * 0.05));
+                }
                 return;
             }
 
