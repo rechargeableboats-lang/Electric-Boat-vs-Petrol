@@ -396,11 +396,11 @@
         const elecAudio = new Audio();
         const petrolAudio = new Audio();
 
-        elecAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/electric-motor-sound-quiet.mp3';
+        elecAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/freesound_community-boat-on-river-26388.mp3';
         elecAudio.loop = true;
         elecAudio.crossOrigin = 'anonymous';
 
-        petrolAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/freesound_community-boat-on-river-26388.mp3';
+        petrolAudio.src = 'https://raw.githubusercontent.com/rechargeableboats-lang/Electric-Boat-vs-Petrol/main/electric-motor-sound-quiet.mp3';
         petrolAudio.loop = true;
         petrolAudio.crossOrigin = 'anonymous';
 
@@ -449,10 +449,10 @@
             }
             document.getElementById('petrolNoiseLevel').textContent = noiseLevel.toFixed(0) + ' dB 🔊';
 
-            let effectiveThrottle = throttle < 30 ? 0 : throttle - 30;
-            const targetSpeed = (effectiveThrottle / 70) * 25;
+            let effectiveThrottle = throttle < 25 ? 0 : throttle - 25;
+            const targetSpeed = (effectiveThrottle / 75) * 25;
 
-            petrolSpeed = petrolSpeed + (targetSpeed - petrolSpeed) * 0.15;
+            petrolSpeed = petrolSpeed + (targetSpeed - petrolSpeed) * 0.12;
 
             if (throttle === 0) {
                 petrolSpeed = petrolSpeed * 0.90;
@@ -506,12 +506,28 @@
 
         function syncVideoToSpeed(mode, speed) {
             const video = mode === 'electric' ? document.getElementById('electricVideo') : document.getElementById('petrolVideo');
+            const dir = mode === 'electric' ? elecDir : petrolDir;
             if (!video) return;
 
+            // Handle direction - stop for HOVER and N (neutral)
+            if (dir === 'hover' || dir === 'neutral') {
+                video.pause();
+                video.currentTime = 0;
+                return;
+            }
+
+            // Handle reverse
+            if (dir === 'reverse') {
+                video.pause();
+                video.currentTime = video.duration || 0;
+                return;
+            }
+
+            // Forward motion
             const maxSpeed = 25;
             const speedRatio = Math.min(speed / maxSpeed, 1);
 
-            if (speedRatio < 0.25) {
+            if (speedRatio < 0.1) {
                 video.pause();
                 video.currentTime = 0;
             } else {
